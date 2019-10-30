@@ -4,12 +4,16 @@
  * Creates a self-signed certificate and associated key for the given domain
  * name.
  * 
- * Usage: jamp create-cert <domain name>
+ * Usage: jamp create-cert <domain name> [<serial number>]
  * 
  * For example: jamp create-cert mywebsite.localhost would generate two files,
  * a certificate for the given domain name as well as a private key. Both files
  * are saved in current working directory.
  * 
+ * If there is an error to the effect of "SEC_ERROR_REUSED_ISSUER_AND_SERIAL"
+ * when attempting to use the certificate, try incrementing the serial number
+ * value (accepts values between 0 and PHP_INT_MAX).
+ *  
  * @author  jamp-shareable-scripts <https://github.com/jamp-shareable-scripts>
  * @license GPL-2.0
  */
@@ -22,6 +26,7 @@ if (!isset($argv[1])) {
 jampUse(['jampIsWindows', 'jampEcho']);
 
 $domain = $argv[1];
+$serial = isset($argv[2]) ? intval($argv[2]) : 0;
 $sep = DIRECTORY_SEPARATOR;
 
 /**
@@ -118,7 +123,7 @@ if (!$csr) {
 $x509 = openssl_csr_sign($csr, null, $privateKey, 365, [
 	'digest_alg' => 'sha256',
 	'config' => $opensslCnfFilename
-]);
+], $serial);
 if (!$x509) {
 	throw new Error(getOpensslError());
 }
