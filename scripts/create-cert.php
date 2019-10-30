@@ -56,7 +56,7 @@ file_put_contents($opensslCnfFilename, '
 [ req ]
 default_bits = 2048
 default_keyfile = server-key.pem
-distinguished_name  = subject
+distinguished_name = subject
 req_extensions = req_ext
 x509_extensions = x509_ext
 string_mask = utf8only
@@ -77,7 +77,7 @@ emailAddress_default = test@example.com
 
 [ x509_ext ]
 subjectKeyIdentifier = hash
-authorityKeyIdentifier  = keyid,issuer
+authorityKeyIdentifier = keyid,issuer
 basicConstraints = CA:FALSE
 keyUsage = digitalSignature, keyEncipherment
 subjectAltName = @alternate_names
@@ -124,12 +124,14 @@ if (!$x509) {
 }
 
 // Export certificate.
-if (!openssl_x509_export_to_file($x509, $domain . '.cert.pem')) {
+$certFileName = $domain . '.cert.pem';
+if (!openssl_x509_export_to_file($x509, $certFileName)) {
 	throw new Error(getOpensslError());
 };
 
 // Export private key.
-if (!openssl_pkey_export_to_file($privateKey, $domain . '.key.pem', null, [
+$privateKeyFileName = $domain . '.key.pem';
+if (!openssl_pkey_export_to_file($privateKey, $privateKeyFileName, null, [
 	'config' => $opensslCnfFilename,
 	'encrypt_key' => false
 ])) {
@@ -141,5 +143,5 @@ unlink($opensslCnfFilename);
 
 // Tell the user about the new files.
 jampEcho('Created:
-' . $domain . '.cert.pem' . '
-' . $domain . '.key.pem');
+' . $certFileName . '
+' . $privateKeyFileName);
